@@ -3,7 +3,7 @@ const Forbidden = require('../errors/Forbidden');
 const NotFound = require('../errors/NotFound');
 const Movie = require('../models/movie');
 
-module.exports.getMovies = async (res, next) => {
+module.exports.getMovies = async (req, res, next) => {
   try {
     const movies = await Movie.find({});
     res.send({ data: movies });
@@ -15,7 +15,7 @@ module.exports.getMovies = async (res, next) => {
 module.exports.createMovie = async (req, res, next) => {
   const {
     country, director, duration,
-    year, description, image, trailer,
+    year, description, image, trailerLink,
     nameRU, nameEN, thumbnail, movieId,
   } = req.body;
   const owner = req.user.id;
@@ -27,7 +27,7 @@ module.exports.createMovie = async (req, res, next) => {
       year,
       description,
       image,
-      trailer,
+      trailerLink,
       nameRU,
       nameEN,
       thumbnail,
@@ -37,6 +37,7 @@ module.exports.createMovie = async (req, res, next) => {
     res.status(201).send({ newMovie });
   } catch (err) {
     if (err.name === 'ValidationError') {
+      console.log(err);
       next(new BadRequest('Ошибка валидации'));
       return;
     }

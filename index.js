@@ -2,7 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const routes = require('./routes/routes');
+const { allowedCors, limiterSettings } = require('./utils/constants');
 
 const { NODE_ENV, MONGODB_URL } = process.env;
 
@@ -12,10 +14,6 @@ const app = express();
 
 app.use(helmet());
 
-const allowedCors = [
-
-];
-
 app.use(express.json());
 
 app.use(
@@ -23,6 +21,8 @@ app.use(
     origin: allowedCors,
   }),
 );
+
+app.use(rateLimit(limiterSettings));
 
 app.use(routes);
 
@@ -43,7 +43,7 @@ async function handleDbConnect() {
       console.log(`Слушаю ${PORT} порт`);
     });
   } else {
-    await mongoose.connect('mongodb://localhost:27017/mestodb', {
+    await mongoose.connect('mongodb://localhost:27017/moviesdb', {
       useNewUrlParser: true,
       useUnifiedTopology: false,
     });

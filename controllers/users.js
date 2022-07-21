@@ -19,10 +19,10 @@ module.exports.getMyProfile = async (req, res, next) => {
 
 module.exports.updateUserProfile = async (req, res, next) => {
   try {
-    const { name, about } = req.body;
+    const { name } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
-      { name, about },
+      { name },
       { new: true, runValidators: true },
     );
     res.status(200).send({ data: updatedUser });
