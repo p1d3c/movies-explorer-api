@@ -18,11 +18,16 @@ module.exports.getMyProfile = async (req, res, next) => {
 };
 
 module.exports.updateUserProfile = async (req, res, next) => {
+  const { name, email } = req.body;
   try {
-    const { name } = req.body;
+    const emailExist = await User.find({ email });
+    if (emailExist.length > 0 && email !== emailExist[0].email) {
+      next(new Conflict('Пользователь с такой почтой уже существует'));
+      return;
+    }
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
-      { name },
+      { name, email },
       { new: true, runValidators: true },
     );
     res.status(200).send({ data: updatedUser });

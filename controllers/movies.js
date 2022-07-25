@@ -37,7 +37,6 @@ module.exports.createMovie = async (req, res, next) => {
     res.status(201).send({ newMovie });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      console.log(err);
       next(new BadRequest('Ошибка валидации'));
       return;
     }
@@ -46,15 +45,15 @@ module.exports.createMovie = async (req, res, next) => {
 };
 
 module.exports.deleteMovie = async (req, res, next) => {
-  const movieToDelete = await Movie.findById(req.params.movieId);
   const ownerId = req.user.id;
   try {
-    if (ownerId !== movieToDelete.owner._id.toString()) {
-      next(new Forbidden('Чужие фильмы удалять нельзя'));
-      return;
-    }
+    const movieToDelete = await Movie.findById(req.params.movieId);
     if (!movieToDelete) {
       next(new NotFound('Фильм не найден'));
+      return;
+    }
+    if (ownerId !== movieToDelete.owner.toString()) {
+      next(new Forbidden('Чужие фильмы удалять нельзя'));
       return;
     }
     await Movie.findByIdAndRemove(req.params.movieId);

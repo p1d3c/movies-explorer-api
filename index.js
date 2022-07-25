@@ -6,9 +6,7 @@ const rateLimit = require('express-rate-limit');
 const routes = require('./routes/routes');
 const { allowedCors, limiterSettings } = require('./utils/constants');
 
-const { NODE_ENV, MONGODB_URL } = process.env;
-
-const { PORT = 3000 } = process.env;
+const { NODE_ENV, MONGODB_URL, PORT = 3000 } = process.env;
 
 const app = express();
 
@@ -33,25 +31,14 @@ app.use((err, req, res, next) => {
 });
 
 async function handleDbConnect() {
-  if (NODE_ENV === 'production') {
-    await mongoose.connect(`${MONGODB_URL}`, {
-      useNewUrlParser: true,
-      useUnifiedTopology: false,
-    });
-    console.log('Соединение с БД установлено');
-    app.listen(PORT, () => {
-      console.log(`Слушаю ${PORT} порт`);
-    });
-  } else {
-    await mongoose.connect('mongodb://localhost:27017/moviesdb', {
-      useNewUrlParser: true,
-      useUnifiedTopology: false,
-    });
-    console.log('Соединение с БД установлено');
-    app.listen(PORT, () => {
-      console.log(`Слушаю ${PORT} порт`);
-    });
-  }
+  await mongoose.connect(NODE_ENV === 'production' ? MONGODB_URL : 'mongodb://localhost:27017/moviesdb', {
+    useNewUrlParser: true,
+    useUnifiedTopology: false,
+  });
+  console.log('Соединение с БД установлено');
+  app.listen(PORT, () => {
+    console.log(`Слушаю ${PORT} порт`);
+  });
 }
 
 handleDbConnect();
