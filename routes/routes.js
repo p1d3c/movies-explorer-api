@@ -5,10 +5,8 @@ const movieRouter = require('./movies');
 const { isAuthorized } = require('../middlewares/auth');
 const NotFound = require('../errors/NotFound');
 const { createUser, login } = require('../controllers/users');
-const { requestLogger, errorLogger } = require('../middlewares/logger');
+const { errorLogger } = require('../middlewares/logger');
 const { validateRegistration, validateAuthorization } = require('../utils/validations');
-
-router.use(requestLogger);
 
 router.post('/signup', validateRegistration, createUser);
 router.post('/signin', validateAuthorization, login);

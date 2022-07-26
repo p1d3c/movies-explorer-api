@@ -5,6 +5,8 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const routes = require('./routes/routes');
 const { allowedCors, limiterSettings } = require('./utils/constants');
+const { errorHandler } = require('./middlewares/errorHandler');
+const { requestLogger } = require('./middlewares/logger');
 
 const { NODE_ENV, MONGODB_URL, PORT = 3000 } = process.env;
 
@@ -20,15 +22,13 @@ app.use(
   }),
 );
 
+app.use(requestLogger);
+
 app.use(rateLimit(limiterSettings));
 
 app.use(routes);
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
-  next();
-});
+app.use(errorHandler);
 
 async function handleDbConnect() {
   await mongoose.connect(NODE_ENV === 'production' ? MONGODB_URL : 'mongodb://localhost:27017/moviesdb', {

@@ -4,8 +4,7 @@ const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
 const Unauthorized = require('../errors/Unauthorized');
 const { getToken } = require('../middlewares/auth');
-
-const SALT_ROUNDS = 10;
+const { SALT_ROUNDS, MONGO_DUPLICATE_KEY, userErrorMessages } = require('../utils/constants');
 
 module.exports.getMyProfile = async (req, res, next) => {
   try {
@@ -20,9 +19,14 @@ module.exports.getMyProfile = async (req, res, next) => {
 module.exports.updateUserProfile = async (req, res, next) => {
   const { name, email } = req.body;
   try {
-    const emailExist = await User.find({ email });
-    if (emailExist.length > 0 && email !== emailExist[0].email) {
-      next(new Conflict('Пользователь с такой почтой уже существует'));
+    const existUser = await User.findOne({ email });
+    if (name !== existUser.name) {
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user.id,
+        { name, email },
+        { new: true, runValidators: true },
+      );
+      res.send({ data: updatedUser });
       return;
     }
     const updatedUser = await User.findByIdAndUpdate(
@@ -30,14 +34,18 @@ module.exports.updateUserProfile = async (req, res, next) => {
       { name, email },
       { new: true, runValidators: true },
     );
-    res.status(200).send({ data: updatedUser });
+    res.send({ data: updatedUser });
   } catch (err) {
+    if (err.code === MONGO_DUPLICATE_KEY) {
+      next(new Conflict(userErrorMessages.emailConflict));
+      return;
+    }
     if (err.name === 'ValidationError') {
       next(new BadRequest(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
       return;
     }
     if (err.name === 'CastError') {
-      next(new BadRequest('Пользователь не найден'));
+      next(new BadRequest(userErrorMessages.userNotFound));
       return;
     }
     next(err);
@@ -51,7 +59,7 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
     if (user) {
-      next(new Conflict('Пользователь уже существует'));
+      next(new Conflict(userErrorMessages.emailConflict));
       return;
     }
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
@@ -63,7 +71,7 @@ module.exports.createUser = async (req, res, next) => {
     res.status(201).send({ data: newUser });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некоректные данные'));
+      next(new BadRequest(userErrorMessages.validationError));
       return;
     }
     next(err);
@@ -75,12 +83,12 @@ module.exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      next(new Unauthorized('Неправильные логин или пароль'));
+      next(new Unauthorized(userErrorMessages.unauthorized));
       return;
     }
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      next(new Unauthorized('Неправильные логин или пароль'));
+      next(new Unauthorized(userErrorMessages.unauthorized));
       return;
     }
 
@@ -89,7 +97,7 @@ module.exports.login = async (req, res, next) => {
     res.send({ token });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequest('Неправильные логин или пароль'));
+      next(new BadRequest(userErrorMessages.unauthorized));
       return;
     }
     next(err);
