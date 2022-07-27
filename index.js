@@ -8,6 +8,7 @@ const routes = require('./routes/routes');
 const { allowedCors, limiterSettings } = require('./utils/constants');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { requestLogger } = require('./middlewares/logger');
+const { MONGODB_URL_DEV } = require('./utils/config');
 
 const { NODE_ENV, MONGODB_URL, PORT = 3000 } = process.env;
 
@@ -32,7 +33,7 @@ app.use(routes);
 app.use(errorHandler);
 
 async function handleDbConnect() {
-  await mongoose.connect(NODE_ENV === 'production' ? MONGODB_URL : 'mongodb://localhost:27017/moviesdb', {
+  await mongoose.connect(NODE_ENV === 'production' ? MONGODB_URL : MONGODB_URL_DEV, {
     useNewUrlParser: true,
     useUnifiedTopology: false,
   });

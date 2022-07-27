@@ -19,16 +19,6 @@ module.exports.getMyProfile = async (req, res, next) => {
 module.exports.updateUserProfile = async (req, res, next) => {
   const { name, email } = req.body;
   try {
-    const existUser = await User.findOne({ email });
-    if (name !== existUser.name) {
-      const updatedUser = await User.findByIdAndUpdate(
-        req.user.id,
-        { name, email },
-        { new: true, runValidators: true },
-      );
-      res.send({ data: updatedUser });
-      return;
-    }
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       { name, email },

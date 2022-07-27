@@ -1,4 +1,12 @@
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
+
+const validateLink = (value, helpers) => {
+  if (validator.isURL(value)) {
+    return value;
+  }
+  return helpers.message(`Поле ${helpers.state.path[0]} должно содержать ссылку`);
+};
 
 const validateRegistration = celebrate({
   body: Joi.object().keys({
@@ -29,11 +37,11 @@ const validateCreateMovie = celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required().uri(),
-    trailerLink: Joi.string().required().uri(),
+    image: Joi.string().required().custom(validateLink),
+    trailerLink: Joi.string().required().custom(validateLink),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
-    thumbnail: Joi.string().required().uri(),
+    thumbnail: Joi.string().required().custom(validateLink),
     movieId: Joi.number().required(),
   }),
 });
