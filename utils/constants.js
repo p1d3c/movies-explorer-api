@@ -1,6 +1,4 @@
-const allowedCors = [
-
-];
+const allowedCors = ["https://api.p1d3c.moviesexplorer.nomoredomains.icu"];
 
 const limiterSettings = {
   windowMs: 15 * 60 * 1000,
@@ -13,20 +11,20 @@ const SALT_ROUNDS = 10;
 const MONGO_DUPLICATE_KEY = 11000;
 
 const userErrorMessages = {
-  emailConflict: 'Пользователь с такой почтой уже существует',
-  userNotFound: 'Пользователь не найден',
-  validationError: 'Переданы некоректные данные',
-  unauthorized: 'Неправильные логин или пароль',
+  emailConflict: "Пользователь с такой почтой уже существует",
+  userNotFound: "Пользователь не найден",
+  validationError: "Переданы некоректные данные",
+  unauthorized: "Неправильные логин или пароль",
 };
 
 const movieErrorMessages = {
-  validationError: 'Переданы некоректные данные',
-  movieNotFound: 'Фильм не найден',
-  forbiddenDelete: 'Чужие фильмы удалять нельзя',
+  validationError: "Переданы некоректные данные",
+  movieNotFound: "Фильм не найден",
+  forbiddenDelete: "Чужие фильмы удалять нельзя",
 };
 
 const movieResponseMessages = {
-  successDelete: 'Фильм удален',
+  successDelete: "Фильм удален",
 };
 
 module.exports = {
