@@ -1,4 +1,8 @@
-const allowedCors = ["https://p1d3c.moviesexplorer.nomoredomains.icu"];
+const allowedCors = [
+  "https://p1d3c.moviesexplorer.nomoredomains.icu",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
 
 const limiterSettings = {
   windowMs: 15 * 60 * 1000,
